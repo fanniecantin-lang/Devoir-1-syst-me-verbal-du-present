@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Survie : Le système verbal du présent</title>
+    <!-- Chargement de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Polices Google Fonts : Inter (lisibilité) et Outfit (titres dynamiques aventure) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        cream: '#FAF7F0',
+                        pine: {
+                            50: '#F1F7F4',
+                            100: '#DCECE4',
+                            600: '#276749',
+                            700: '#1C4B35',
+                            800: '#143827',
+                            900: '#0D261A',
+                        },
+                        amberTrail: {
+                            50: '#FFFBEB',
+                            100: '#FEF3C7',
+                            400: '#FBBF24',
+                            500: '#F59E0B',
+                            600: '#D97706',
+                            800: '#92400E',
+                        },
+                        earth: '#5C4033'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-card {
+            animation: slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .choice-card {
+            transition: all 0.2s ease;
+        }
+        .choice-card:not(:disabled):hover {
+            transform: translateY(-2px);
+        }
+        /* Motif topographique subtil en arrière-plan */
+        .bg-topo {
+            background-color: #FAF7F0;
+            background-image: radial-gradient(#1C4B35 0.5px, transparent 0.5px), radial-gradient(#1C4B35 0.5px, #FAF7F0 0.5px);
+            background-size: 28px 28px;
+            background-position: 0 0, 14px 14px;
+            background-blend-mode: multiply;
+        }
+        .bg-topo-overlay {
+            background: rgba(250, 247, 240, 0.96);
+        }
+    </style>
+</head>
+<body class="bg-topo text-slate-800 min-h-screen flex flex-col antialiased selection:bg-pine-100 selection:text-pine-900">
+    <div class="bg-topo-overlay min-h-screen flex flex-col">
+
+        <!-- En-tête thématique Aventure & Nature -->
+        <header class="bg-pine-800 text-white shadow-lg border-b-4 border-amberTrail-500">
+            <div class="max-w-4xl mx-auto px-4 py-5 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4 text-center sm:text-left">
+                    <!-- Icône SVG Boussole & Montagne -->
+                    <div class="bg-pine-700/90 p-3 rounded-2xl border border-pine-600 shadow-inner shrink-0">
+                        <svg class="w-9 h-9 text-amberTrail-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 20h18L14 7l-4.5 7L7 10l-4 10z" />
+                            <circle cx="17.5" cy="5.5" r="2.5" class="text-amberTrail-400" fill="currentColor" stroke="none" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-amberTrail-500 text-pine-900 px-2.5 py-0.5 rounded-full mb-1">
+                            <span>🧭</span> Récupération d'amorce • 1re secondaire
+                        </div>
+                        <h1 class="font-display text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+                            Mission Survie : Le système verbal du présent
+                        </h1>
+                    </div>
+                </div>
+
+                <!-- Bouton repliable : Aide-mémoire -->
+                <button id="toggle-guide-btn" type="button" aria-expanded="true" class="inline-flex items-center gap-2 bg-amberTrail-400 hover:bg-amberTrail-500 text-pine-900 font-bold text-sm px-4 py-2.5 rounded-xl shadow-md transition focus:outline-none focus:ring-2 focus:ring-white shrink-0">
+                    <span id="guide-btn-text">📖 Aide-mémoire : Le carnet de survie</span>
+                    <svg id="guide-chevron" class="w-4 h-4 transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Contenu principal -->
+        <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-6 sm:py-8 space-y-6">
+
+            <!-- Panneau Aide-mémoire repliable : Le carnet de survie -->
+            <section id="survival-guide-panel" class="bg-white rounded-2xl shadow-sm border-2 border-pine-600/30 overflow-hidden transition-all duration-300">
+                <div class="bg-pine-50 px-5 py-3.5 border-b border-pine-100 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl" aria-hidden="true">🎒</span>
+                        <h2 class="font-display font-bold text-pine-900 text-base sm:text-lg">
+                            Le carnet de survie : Les 3 temps du récit d'aventures au présent
+                        </h2>
+                    </div>
+                    <span class="text-xs font-semibold text-pine-700 bg-pine-100 px-2.5 py-1 rounded-lg">
+                        Repère-toi dans le temps !
+                    </span>
+                </div>
+
+                <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Carte 1 : Présent de l'indicatif -->
+                    <div class="p-4 rounded-xl bg-pine-50/80 border border-pine-200 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <span class="font-display font-bold text-pine-900 text-base">1. Présent de l'indicatif</span>
+                            </div>
+                            <span class="inline-block text-xs font-bold uppercase tracking-wide bg-pine-600 text-white px-2.5 py-0.5 rounded-md mb-2">
+                                Temps de base
+                            </span>
+                            <p class="text-sm text-slate-700 leading-relaxed">
+                                Raconte les <strong>actions principales</strong> au moment où elles se déroulent, décrit le <strong>décor</strong> et exprime les <strong>émotions</strong>.
+                            </p>
+                        </div>
+                        <p class="text-xs text-pine-800 bg-white/80 p-2.5 rounded-lg border border-pine-100 italic mt-3">
+                            Ex. : L'explorateur <strong>escalade</strong> la paroi et <strong>observe</strong> l'horizon.
+                        </p>
+                    </div>
+
+                    <!-- Carte 2 : Passé composé -->
+                    <div class="p-4 rounded-xl bg-amberTrail-50/80 border border-amberTrail-200 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <span class="font-display font-bold text-amberTrail-800 text-base">2. Passé composé</span>
+                            </div>
+                            <span class="inline-block text-xs font-bold uppercase tracking-wide bg-amberTrail-600 text-white px-2.5 py-0.5 rounded-md mb-2">
+                                Retour en arrière
+                            </span>
+                            <p class="text-sm text-slate-700 leading-relaxed">
+                                Marque l'<strong>antériorité</strong> : un événement qui est arrivé <em>avant</em> le moment présent de l'histoire.
+                            </p>
+                        </div>
+                        <p class="text-xs text-amberTrail-900 bg-white/80 p-2.5 rounded-lg border border-amberTrail-100 italic mt-3">
+                            Ex. : Il réalise qu'il <strong>a laissé</strong> sa lampe de poche au campement.
+                        </p>
+                    </div>
+
+                    <!-- Carte 3 : Futur simple -->
+                    <div class="p-4 rounded-xl bg-sky-50/80 border border-sky-200 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <span class="font-display font-bold text-sky-900 text-base">3. Futur simple</span>
+                            </div>
+                            <span class="inline-block text-xs font-bold uppercase tracking-wide bg-sky-700 text-white px-2.5 py-0.5 rounded-md mb-2">
+                                Projection dans l'avenir
+                            </span>
+                            <p class="text-sm text-slate-700 leading-relaxed">
+                                Marque la <strong>postériorité</strong> : ce qui va se passer <em>plus tard</em> dans l'aventure (un plan, une prédiction).
+                            </p>
+                        </div>
+                        <p class="text-xs text-sky-900 bg-white/80 p-2.5 rounded-lg border border-sky-100 italic mt-3">
+                            Ex. : Dès l'aube, l'équipe <strong>reprendra</strong> la piste vers le refuge.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Zone interactive du Quiz -->
+            <section id="quiz-card" class="bg-white rounded-2xl shadow-md border border-slate-200 p-5 sm:p-8">
+                <!-- Barre de progression et pointage -->
+                <div class="mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-sm font-semibold mb-2.5">
+                        <span id="step-indicator" class="text-pine-800 font-display text-base">
+                            Étape 1 sur 10
+                        </span>
+                        <span id="score-display" class="bg-pine-50 text-pine-800 px-3.5 py-1 rounded-full border border-pine-200 font-bold">
+                            Points : 0 / 10
+                        </span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                        <div id="progress-fill" class="bg-gradient-to-r from-pine-600 to-amberTrail-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 10%;"></div>
+                    </div>
+                </div>
+
+                <!-- Conteneur de la question -->
+                <div id="question-view" class="animate-card">
+                    <!-- Badge du type de défi -->
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <span id="question-type-badge" class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-lg bg-amberTrail-100 text-amberTrail-800">
+                            <!-- Injecté par JS -->
+                        </span>
+                    </div>
+
+                    <!-- Encadré de l'extrait de récit -->
+                    <div class="bg-cream border-2 border-pine-100 rounded-2xl p-5 sm:p-6 mb-6 shadow-inner">
+                        <p id="sentence-text" class="text-lg sm:text-xl text-slate-800 leading-relaxed font-medium">
+                            <!-- Injecté par JS -->
+                        </p>
+                        <p id="instruction-text" class="text-sm font-semibold text-pine-800 mt-3 pt-3 border-t border-pine-200/60">
+                            <!-- Injecté par JS -->
+                        </p>
+                    </div>
+
+                    <!-- Grille des options -->
+                    <div id="choices-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6">
+                        <!-- Boutons générés par JS -->
+                    </div>
+
+                    <!-- Rétroaction immédiate -->
+                    <div id="feedback-panel" class="hidden rounded-2xl p-5 mb-6 border-2 animate-card">
+                        <div class="flex items-start gap-3.5">
+                            <div id="feedback-emoji" class="text-2xl sm:text-3xl shrink-0 mt-0.5"></div>
+                            <div class="space-y-1.5">
+                                <h3 id="feedback-heading" class="font-display font-bold text-base sm:text-lg"></h3>
+                                <span id="feedback-rule-tag" class="inline-block text-xs font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-md"></span>
+                                <p id="feedback-text" class="text-sm sm:text-base leading-relaxed pt-1"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bouton Étape suivante -->
+                    <div class="flex justify-end">
+                        <button id="next-step-btn" type="button" class="hidden w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pine-700 hover:bg-pine-800 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition focus:outline-none focus:ring-2 focus:ring-pine-600 focus:ring-offset-2">
+                            <span id="next-step-label">Étape suivante</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Écran final des résultats -->
+                <div id="results-view" class="hidden text-center py-4 animate-card">
+                    <div id="final-badge-emoji" class="text-6xl mb-3">🏔️</div>
+                    <span class="inline-block text-xs font-bold uppercase tracking-widest bg-pine-100 text-pine-800 px-3 py-1 rounded-full mb-2">
+                        Expédition complétée !
+                    </span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
+                        Ton score : <span id="final-score-value" class="text-pine-700">0</span> / 10
+                    </h2>
+                    <p id="adventurer-rank" class="font-display text-lg sm:text-xl font-bold text-amberTrail-600 mb-4"></p>
+                    <p id="final-feedback-msg" class="max-w-xl mx-auto text-slate-700 text-base leading-relaxed mb-7 bg-cream p-5 rounded-2xl border border-pine-200"></p>
+
+                    <!-- Bilan par question -->
+                    <div class="mb-8">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Ton journal de bord :</p>
+                        <div id="logbook-badges" class="flex flex-wrap justify-center gap-2"></div>
+                    </div>
+
+                    <button id="restart-mission-btn" type="button" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pine-700 hover:bg-pine-800 text-white font-bold px-7 py-3.5 rounded-xl shadow-md transition focus:outline-none focus:ring-2 focus:ring-pine-600 focus:ring-offset-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        <span>Recommencer la mission</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Pied de page -->
+        <footer class="text-center text-xs text-slate-500 py-5 px-4">
+            Activité d'amorce • Français, 1re secondaire • Le récit d'aventures au système verbal du présent
+        </footer>
+    </div>
+
+    <script>
+        // Banque de 10 questions inédites (expédition en montagne / forêt)
+        // Alternance entre :
+        // - Type A : Identifier la valeur d'un verbe conjugué dans le récit
+        // - Type B : Choisir la bonne conjugaison selon la chronologie (présent, passé composé, futur simple)
+        const missionQuestions = [
+            {
+                type: "valeur",
+                badge: "🧭 Défi 1 : Identifier la valeur du temps",
+                sentence: "Au pied de la falaise glacée, l'alpiniste <strong class='text-pine-800 underline decoration-amberTrail-500 decoration-2 underline-offset-4'>vérifie</strong> solidement ses mousquetons avant l'ascension.",
+                instruction: "Quelle est la valeur du verbe souligné au présent de l'indicatif dans cette phrase ?",
+                options: [
+                    "Une action principale au moment où elle se déroule (temps de base)",
+                    "Un retour en arrière sur un événement déjà terminé",
+                    "Une projection dans l'avenir (plan pour plus tard)"
+                ],
+                correctIndex: 0,
+                ruleTag: "Présent de l'indicatif • Temps de base",
+                explanation: "Bravo ! Le verbe « vérifie » exprime une action principale qui se passe directement sous nos yeux, au moment présent du récit."
+            },
+            {
+                type: "conjugaison",
+                badge: "🎒 Défi 2 : Choisir le bon temps",
+                sentence: "En ouvrant son sac à dos au sommet du col, Camille découvre avec horreur qu'elle __________ (perdre) sa carte topographique en chemin.",
+                instruction: "Conjugue le verbe « perdre » selon la chronologie du récit :",
+                options: [
+                    "perd (présent)",
+                    "a perdu (passé composé)",
+                    "perdra (futur simple)"
+                ],
+                correctIndex: 1,
+                ruleTag: "Passé composé • Retour en arrière (antériorité)",
+                explanation: "Exact ! Camille a perdu sa carte « en chemin », donc AVANT le moment où elle ouvre son sac. On utilise le passé composé pour marquer ce retour en arrière."
+            },
+            {
+                type: "conjugaison",
+                badge: "⛺ Défi 3 : Choisir le bon temps",
+                sentence: "Le brouillard devient trop épais pour continuer : les deux randonneurs décident qu'ils __________ (monter) leur tente près de cette clairière dès la tombée du jour.",
+                instruction: "Conjugue le verbe « monter » selon la chronologie du récit :",
+                options: [
+                    "montent (présent)",
+                    "ont monté (passé composé)",
+                    "monteront (futur simple)"
+                ],
+                correctIndex: 2,
+                ruleTag: "Futur simple • Projection dans l'avenir",
+                explanation: "Bien joué ! Les randonneurs planifient ce qu'ils feront plus tard (« dès la tombée du jour »). Cette projection dans l'avenir exige le futur simple."
+            },
+            {
+                type: "valeur",
+                badge: "🐺 Défi 4 : Identifier la valeur du temps",
+                sentence: "Soudain, un hurlement de loup <strong class='text-pine-800 underline decoration-amberTrail-500 decoration-2 underline-offset-4'>déchire</strong> le silence de la vallée et glace le sang des campeurs.",
+                instruction: "Pourquoi l'auteur emploie-t-il le présent de l'indicatif (« déchire ») ici ?",
+                options: [
+                    "Pour raconter un événement qui s'est produit la veille",
+                    "Pour raconter une action soudaine au moment présent du récit",
+                    "Pour formuler une prédiction sur la nuit prochaine"
+                ],
+                correctIndex: 1,
+                ruleTag: "Présent de l'indicatif • Action soudaine",
+                explanation: "Tout à fait ! Introduit par l'organisateur « Soudain », ce verbe au présent fait surgir l'élément déclencheur au cœur de l'action."
+            },
+            {
+                type: "valeur",
+                badge: "🔦 Défi 5 : Identifier la valeur du temps",
+                sentence: "Le guide se souvient heureusement que les gardes-forestiers <strong class='text-pine-800 underline decoration-amberTrail-500 decoration-2 underline-offset-4'>ont installé</strong> un abri d'urgence derrière cette crête l'automne dernier.",
+                instruction: "Quelle est la valeur du verbe au passé composé (« ont installé ») dans ce passage ?",
+                options: [
+                    "Il décrit le décor actuel de la montagne",
+                    "Il annonce ce que le guide fera dans une heure",
+                    "Il marque un retour en arrière (événement arrivé avant le récit)"
+                ],
+                correctIndex: 2,
+                ruleTag: "Passé composé • Retour en arrière (antériorité)",
+                explanation: "Parfait ! L'indice « l'automne dernier » confirme que la construction de l'abri a eu lieu bien avant le moment où le guide s'en souvient."
+            },
+            {
+                type: "conjugaison",
+                badge: "🌨️ Défi 6 : Choisir le bon temps",
+                sentence: "Autour du campement, la neige __________ (tomber) à gros flocons et le vent glacial fait claquer la toile de l'abri.",
+                instruction: "Conjugue le verbe « tomber » pour décrire la scène actuelle :",
+                options: [
+                    "tombe (présent)",
+                    "est tombée (passé composé)",
+                    "tombera (futur simple)"
+                ],
+                correctIndex: 0,
+                ruleTag: "Présent de l'indicatif • Description du décor",
+                explanation: "Excellent ! Dans le système verbal du présent, la description du décor et de la météo au moment où se déroule l'action se fait au présent de l'indicatif."
+            },
+            {
+                type: "conjugaison",
+                badge: "🚁 Défi 7 : Choisir le bon temps",
+                sentence: "L'équipe de sauvetage assure par radio qu'un hélicoptère __________ (survoler) le secteur dès que la tempête se calmera.",
+                instruction: "Conjugue le verbe « survoler » selon la chronologie du récit :",
+                options: [
+                    "survole (présent)",
+                    "a survolé (passé composé)",
+                    "survolera (futur simple)"
+                ],
+                correctIndex: 2,
+                ruleTag: "Futur simple • Projection dans l'avenir",
+                explanation: "Bravo ! Le passage des secours est prévu pour plus tard (« dès que la tempête se calmera »). C'est une projection dans l'avenir, donc on emploie le futur simple."
+            },
+            {
+                type: "valeur",
+                badge: "🗺️ Défi 8 : Identifier la valeur du temps",
+                sentence: "Si nous suivons ce ruisseau vers le sud, nous <strong class='text-pine-800 underline decoration-amberTrail-500 decoration-2 underline-offset-4'>atteindrons</strong> le village avant la nuit.",
+                instruction: "Quelle est la valeur du verbe au futur simple (« atteindrons ») dans cette phrase ?",
+                options: [
+                    "Une projection dans l'avenir (conséquence prévue plus tard)",
+                    "Un souvenir d'une randonnée précédente",
+                    "Une émotion ressentie au moment présent"
+                ],
+                correctIndex: 0,
+                ruleTag: "Futur simple • Projection dans l'avenir",
+                explanation: "Exact ! L'arrivée au village est envisagée dans l'avenir (« avant la nuit ») comme le résultat du plan choisi par les aventuriers."
+            },
+            {
+                type: "conjugaison",
+                badge: "🐻 Défi 9 : Choisir le bon temps",
+                sentence: "Au réveil, les explorateurs remarquent des traces géantes dans la boue : un ours __________ (rôder) autour de leurs provisions pendant la nuit !",
+                instruction: "Conjugue le verbe « rôder » selon la chronologie du récit :",
+                options: [
+                    "rôde (présent)",
+                    "a rôdé (passé composé)",
+                    "rôdera (futur simple)"
+                ],
+                correctIndex: 1,
+                ruleTag: "Passé composé • Retour en arrière (antériorité)",
+                explanation: "Super ! Au réveil (moment présent), les explorateurs constatent ce qui s'est passé AVANT (« pendant la nuit »). Le passé composé exprime ce retour en arrière."
+            },
+            {
+                type: "conjugaison",
+                badge: "🔥 Défi 10 : Choisir le bon temps",
+                sentence: "Malgré le froid mordant, Samuel __________ (frotter) deux silex avec détermination, car il sait que ce petit feu lui sauvera la vie.",
+                instruction: "Conjugue le verbe « frotter » pour raconter l'action en cours :",
+                options: [
+                    "frotte (présent)",
+                    "a frotté (passé composé)",
+                    "frottera (futur simple)"
+                ],
+                correctIndex: 0,
+                ruleTag: "Présent de l'indicatif • Action principale",
+                explanation: "Mission accomplie ! « Frotte » décrit l'action principale que Samuel accomplit au moment même de l'histoire (tandis que « sauvera » projette le résultat dans l'avenir)."
+            }
+        ];
+
+        // État du quiz
+        let currentIndex = 0;
+        let score = 0;
+        let hasAnswered = false;
+        let journalLog = [];
+
+        // Éléments du DOM
+        const toggleGuideBtn = document.getElementById('toggle-guide-btn');
+        const guidePanel = document.getElementById('survival-guide-panel');
+        const guideChevron = document.getElementById('guide-chevron');
+
+        const stepIndicator = document.getElementById('step-indicator');
+        const scoreDisplay = document.getElementById('score-display');
+        const progressFill = document.getElementById('progress-fill');
+
+        const questionView = document.getElementById('question-view');
+        const questionTypeBadge = document.getElementById('question-type-badge');
+        const sentenceText = document.getElementById('sentence-text');
+        const instructionText = document.getElementById('instruction-text');
+        const choicesContainer = document.getElementById('choices-container');
+
+        const feedbackPanel = document.getElementById('feedback-panel');
+        const feedbackEmoji = document.getElementById('feedback-emoji');
+        const feedbackHeading = document.getElementById('feedback-heading');
+        const feedbackRuleTag = document.getElementById('feedback-rule-tag');
+        const feedbackText = document.getElementById('feedback-text');
+
+        const nextStepBtn = document.getElementById('next-step-btn');
+        const nextStepLabel = document.getElementById('next-step-label');
+
+        const resultsView = document.getElementById('results-view');
+        const finalBadgeEmoji = document.getElementById('final-badge-emoji');
+        const finalScoreValue = document.getElementById('final-score-value');
+        const adventurerRank = document.getElementById('adventurer-rank');
+        const finalFeedbackMsg = document.getElementById('final-feedback-msg');
+        const logbookBadges = document.getElementById('logbook-badges');
+        const restartMissionBtn = document.getElementById('restart-mission-btn');
+
+        // Ouverture / Fermeture de l'aide-mémoire
+        let guideVisible = true;
+        toggleGuideBtn.addEventListener('click', () => {
+            guideVisible = !guideVisible;
+            toggleGuideBtn.setAttribute('aria-expanded', String(guideVisible));
+            if (guideVisible) {
+                guidePanel.classList.remove('hidden');
+                guideChevron.classList.add('rotate-180');
+            } else {
+                guidePanel.classList.add('hidden');
+                guideChevron.classList.remove('rotate-180');
+            }
+        });
+
+        // Chargement d'une question
+        function renderQuestion() {
+            try {
+                hasAnswered = false;
+                const q = missionQuestions[currentIndex];
+
+                // Progression et score
+                stepIndicator.textContent = `Étape ${currentIndex + 1} sur ${missionQuestions.length}`;
+                scoreDisplay.textContent = `Points : ${score} / ${missionQuestions.length}`;
+                progressFill.style.width = `${((currentIndex + 1) / missionQuestions.length) * 100}%`;
+
+                // Réinitialisation des panneaux
+                feedbackPanel.classList.add('hidden');
+                nextStepBtn.classList.add('hidden');
+
+                // Animation d'entrée
+                questionView.classList.remove('animate-card');
+                void questionView.offsetWidth;
+                questionView.classList.add('animate-card');
+
+                questionTypeBadge.textContent = q.badge;
+                instructionText.textContent = q.instruction;
+
+                // Mise en forme de la phrase (si texte à trous)
+                if (q.type === "conjugaison") {
+                    sentenceText.innerHTML = q.sentence.replace(
+                        /__________ \(([^)]+)\)/,
+                        '<span class="inline-block border-b-2 border-dashed border-pine-700 text-pine-800 font-bold px-2.5 py-0.5 mx-1 bg-pine-50 rounded-md">__________ ($1)</span>'
+                    );
+                } else {
+                    sentenceText.innerHTML = q.sentence;
+                }
+
+                // Génération des choix (grille adaptée à 3 options)
+                choicesContainer.className = "grid grid-cols-1 gap-3 mb-6";
+                choicesContainer.innerHTML = '';
+                const letters = ['A', 'B', 'C'];
+
+                q.options.forEach((optText, idx) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'choice-card w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-pine-600 hover:bg-pine-50/50 focus:outline-none focus:ring-2 focus:ring-pine-600 flex items-center gap-3.5 group';
+                    btn.innerHTML = `
+                        <span class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-pine-700 group-hover:text-white text-slate-700 font-display font-bold text-sm flex items-center justify-center transition-colors shrink-0">
+                            ${letters[idx]}
+                        </span>
+                        <span class="font-semibold text-base text-slate-800">${optText}</span>
+                    `;
+                    btn.addEventListener('click', () => evaluateAnswer(idx));
+                    choicesContainer.appendChild(btn);
+                });
+            } catch (err) {
+                console.error("Erreur d'affichage :", err);
+            }
+        }
+
+        // Évaluation de la réponse
+        function evaluateAnswer(chosenIdx) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+
+            const q = missionQuestions[currentIndex];
+            const isRight = chosenIdx === q.correctIndex;
+            const buttons = choicesContainer.querySelectorAll('button');
+
+            journalLog.push({
+                step: currentIndex + 1,
+                success: isRight,
+                label: q.ruleTag.split('•')[0].trim()
+            });
+
+            if (isRight) {
+                score++;
+                scoreDisplay.textContent = `Points : ${score} / ${missionQuestions.length}`;
+            }
+
+            // Si question de conjugaison, afficher la forme conjuguée dans la phrase
+            if (q.type === "conjugaison") {
+                const cleanVerb = q.options[q.correctIndex].split(' (')[0];
+                sentenceText.innerHTML = q.sentence.replace(
+                    /__________ \(([^)]+)\)/,
+                    `<span class="inline-block font-bold px-2.5 py-0.5 mx-1 rounded-lg ${isRight ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-amberTrail-100 text-amberTrail-900 border border-amberTrail-300'}">${cleanVerb}</span>`
+                );
+            }
+
+            // Stylisation des boutons après réponse
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:border-pine-600', 'hover:bg-pine-50/50');
+                const badgeLetter = btn.querySelector('span');
+
+                if (idx === q.correctIndex) {
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-emerald-500', 'bg-emerald-50');
+                    badgeLetter.classList.remove('bg-slate-100', 'text-slate-700');
+                    badgeLetter.classList.add('bg-emerald-600', 'text-white');
+                } else if (idx === chosenIdx && !isRight) {
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-rose-500', 'bg-rose-50');
+                    badgeLetter.classList.remove('bg-slate-100', 'text-slate-700');
+                    badgeLetter.classList.add('bg-rose-600', 'text-white');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            // Affichage de la rétroaction pédagogique
+            feedbackPanel.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-950', 'bg-rose-50', 'border-rose-300', 'text-rose-950');
+
+            if (isRight) {
+                feedbackPanel.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-950');
+                feedbackEmoji.textContent = '🌲';
+                feedbackHeading.textContent = 'Bonne piste !';
+                feedbackRuleTag.className = 'inline-block text-xs font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-md bg-emerald-200/80 text-emerald-900';
+            } else {
+                feedbackPanel.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-950');
+                feedbackEmoji.textContent = '🧭';
+                feedbackHeading.textContent = 'Attention, fausse piste !';
+                feedbackRuleTag.className = 'inline-block text-xs font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-md bg-rose-200/80 text-rose-900';
+            }
+
+            feedbackRuleTag.textContent = q.ruleTag;
+            feedbackText.textContent = q.explanation;
+
+            // Bouton pour avancer
+            nextStepLabel.textContent = currentIndex < missionQuestions.length - 1 ? 'Étape suivante' : 'Voir mon bilan d\'expédition';
+            nextStepBtn.classList.remove('hidden');
+        }
+
+        // Navigation vers la question suivante
+        nextStepBtn.addEventListener('click', () => {
+            if (currentIndex < missionQuestions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                displayResults();
+            }
+        });
+
+        // Écran de fin
+        function displayResults() {
+            questionView.classList.add('hidden');
+            resultsView.classList.remove('hidden');
+            finalScoreValue.textContent = score;
+
+            if (score >= 9) {
+                finalBadgeEmoji.textContent = '🏔️';
+                adventurerRank.textContent = 'Grade : Maître-guide de haute montagne !';
+                finalFeedbackMsg.textContent = 'Performance exceptionnelle ! Tu sais parfaitement distinguer les actions principales au présent, les retours en arrière au passé composé et les projections au futur simple. Tu es prêt(e) pour les exercices de rédaction !';
+            } else if (score >= 7) {
+                finalBadgeEmoji.textContent = '🧭';
+                adventurerRank.textContent = 'Grade : Explorateur(trice) chevronné(e) !';
+                finalFeedbackMsg.textContent = 'Très beau parcours ! Tu as un excellent sens de l\'orientation dans le système verbal du présent. Relis les étapes manquées dans ton journal de bord ci-dessous, puis passe à l\'exercice écrit.';
+            } else if (score >= 5) {
+                finalBadgeEmoji.textContent = '🎒';
+                adventurerRank.textContent = 'Grade : Pisteur(euse) en progression';
+                finalFeedbackMsg.textContent = 'Tu es sur la bonne voie, mais quelques repères temporels t\'ont échappé. Ouvre le Carnet de survie en haut de la page pour revoir la différence entre le passé composé (avant) et le futur simple (après), puis retente la mission !';
+            } else {
+                finalBadgeEmoji.textContent = '🔦';
+                adventurerRank.textContent = 'Grade : Apprenti(e) campeur(euse)';
+                finalFeedbackMsg.textContent = 'La forêt était dense aujourd\'hui ! Prends deux minutes pour consulter « Le carnet de survie » en haut de l\'écran afin de bien repérer les trois temps, puis recommence la mission pour améliorer ton score.';
+            }
+
+            // Pastilles du journal de bord
+            logbookBadges.innerHTML = '';
+            journalLog.forEach((entry) => {
+                const badge = document.createElement('span');
+                badge.className = entry.success
+                    ? 'inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-200'
+                    : 'inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-rose-100 text-rose-900 border border-rose-200';
+                badge.textContent = `${entry.success ? '✓' : '✗'} Étape ${entry.step} (${entry.label})`;
+                logbookBadges.appendChild(badge);
+            });
+        }
+
+        // Recommencer la mission
+        restartMissionBtn.addEventListener('click', () => {
+            currentIndex = 0;
+            score = 0;
+            journalLog = [];
+            resultsView.classList.add('hidden');
+            questionView.classList.remove('hidden');
+            renderQuestion();
+        });
+
+        // Initialisation
+        window.addEventListener('DOMContentLoaded', () => {
+            renderQuestion();
+        });
+    </script>
+</body>
+</html>
